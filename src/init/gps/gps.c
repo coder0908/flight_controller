@@ -30,7 +30,7 @@ bool g_gps_init()
 	init_ubx_gps(&g_gps, &huart6, g_ubx_packet_buf, UBX_PACKET_BUF_SIZE, g_uart6_rx_buf, UART6_RX_BUF_SIZE);
 
 	transmit_ubx_data(&g_gps, UBX_CFG_PRT, 28);
-	transmit_ubx_data(&g_gps, UBX_CFG_MSG, 16);
+	transmit_ubx_data(&g_gps, UBX_CFG_MSG_NAV_PVT, 16);
 	transmit_ubx_data(&g_gps, UBX_CFG_RATE, 14);
 	transmit_ubx_data(&g_gps, UBX_CFG_CFG, 21);
 
@@ -51,8 +51,10 @@ bool ubx_callback_callback()
 	if (!checksum) {
 		return false;
 	}
-	parse_ubx_nav_posllh(&g_gps, &g_gps_nav_posllh);
-
+	bool tmp = parse_ubx_nav_posllh(&g_gps, &g_gps_nav_posllh);
+	if (!tmp) {
+		return false;
+	}
 	//printf("checksum : %d, tow_ms : %lu, raw_longitude : %ld, raw_latitude : %ld, height_ellipsoid_mm : %ld, height_msl_mm : %ld, horizontal_accuracy_mm : %lu, vertical_accuracy_mm : %lu \n", checksum, g_gps_nav_posllh.tow_ms, g_gps_nav_posllh.raw_longitude, g_gps_nav_posllh.raw_latitude, g_gps_nav_posllh.height_ellipsoid_mm, g_gps_nav_posllh.height_msl_mm, g_gps_nav_posllh.horizontal_accuracy_mm, g_gps_nav_posllh.vertical_accuracy_mm);
 
 

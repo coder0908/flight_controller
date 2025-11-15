@@ -290,11 +290,10 @@ struct ubx_nav_pvt {
 	uint8_t day;
 	uint8_t hour;
 	uint8_t minuate;
-//	uint8_t valid;
-
-
+	uint8_t second;
+	uint8_t valid;
 	uint32_t time_accuracy_ns;
-	int32_t nano_ns;			// fraction of second, range-1e9 .. 1e9(UTC)
+	int32_t fraction_of_second_ns;			// fraction of second, range-1e9 .. 1e9(UTC)
 	uint8_t gnss_fix_type;			// 0 : no fix, 1 : dead reckoning only, 2 : 2d fix, 3 : 3d fix, 4 : gndss + dead reckoning combined, 5 : time only fix
 	uint8_t flags;				// fix status flags
 	uint8_t flags2;				// additional flags
@@ -328,7 +327,8 @@ struct ubx_nav_pvt {
 
 extern const uint8_t UBX_CFG_PRT[];
 
-extern const uint8_t UBX_CFG_MSG[];
+extern const uint8_t UBX_CFG_MSG_NAV_POSLLH[];
+extern const uint8_t UBX_CFG_MSG_NAV_PVT[];
 
 extern const uint8_t UBX_CFG_RATE[];
 

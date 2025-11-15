@@ -16,6 +16,7 @@ int main()
 		return -1;
 	}
 	int i=0;
+
 	for (;;) {
 		i++;
 		loop();

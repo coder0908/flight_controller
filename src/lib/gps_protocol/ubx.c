@@ -10,6 +10,18 @@
 #include "vmd.h"
 #include <stdlib.h>
 
+//ubx class
+#define UBX_CLASS_NAV 		(0x01)
+
+//ubx id
+#define UBX_ID_POSLLH		(0x02)
+#define UBX_ID_PVT 		(0x07)
+
+//ubx length
+#define UBX_LEN_NAV_POSLLH		(28)
+#define UBX_LEN_NAV_PVT		(92)
+
+
 const uint8_t UBX_CFG_PRT[28] = {
 		0xB5, 0x62, 0x06, 0x00, 0x14, 0x00, 0x01, 0x00,
 		0x00, 0x00, 0xD0, 0x08, 0x00, 0x00, 0x80, 0x25,
@@ -18,13 +30,13 @@ const uint8_t UBX_CFG_PRT[28] = {
 };
 
 //NAV POSLLH
-//const uint8_t UBX_CFG_MSG[16] = {
-//    0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0x01, 0x02,
-//    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x13, 0xBE
-//};
+const uint8_t UBX_CFG_MSG_NAV_POSLLH[16] = {
+		0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0x01, 0x02,
+		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x13, 0xBE
+};
 
 //NAV PVT
-const uint8_t UBX_CFG_MSG[16] = {
+const uint8_t UBX_CFG_MSG_NAV_PVT[16] = {
 		0xB5, 0x62, 0x06, 0x01, 0x08, 0x00, 0x01, 0x07,
 		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x18, 0xE1
 };
@@ -40,6 +52,23 @@ const uint8_t UBX_CFG_CFG[21] = {
 		0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x17, 0x31, 0xBF
 };
+
+static uint32_t buf_to_u32_little_endian(const uint8_t *buf)
+{
+	return buf[0] | (buf[1]<<8) | (buf[2]<<16) | (buf[3]<<24);
+}
+
+//sizeof(buf) == 3
+//ignore highest 8bit
+static uint32_t buf_to_u24_little_endian(const uint8_t *buf)
+{
+	return buf[0] | (buf[1]<<8) | (buf[2]<<16);
+}
+
+static uint16_t buf_to_u16_little_endian(const uint8_t *buf)
+{
+	return buf[0] | (buf[1]<<8);
+}
 
 
 
@@ -120,17 +149,51 @@ bool parse_ubx_nav_posllh(const struct ubx_gps *gps, struct ubx_nav_posllh *nav_
 
 	const uint8_t *buf = gps->packet_buf;
 
-	nav_posllh->tow_ms = buf[6] | buf[7]<<8 | buf[8]<<16 | buf[9]<<24;
-	nav_posllh->longitude_100ndeg = buf[10] | buf[11]<<8 | buf[12]<<16 | buf[13]<<24;
-	nav_posllh->latitude_100ndeg = buf[14] | buf[15]<<8 | buf[16]<<16 | buf[17]<<24;
-	nav_posllh->height_ellipsoid_mm = buf[18] | buf[19]<<8 | buf[20]<<16 | buf[21]<<24;
-	nav_posllh->height_msl_mm = buf[22] | buf[23]<<8 | buf[24]<<16 | buf[25]<<24;
-	nav_posllh->horizontal_accuracy_mm = buf[26] | buf[27]<<8 | buf[28]<<16 | buf[29]<<24;
-	nav_posllh->vertical_accuracy_mm = buf[30] | buf[31]<<8 | buf[32]<<16 | buf[33]<<24;
+	if (buf[2] != UBX_CLASS_NAV || buf[3] != UBX_ID_POSLLH) {
+		return false;
+	}
+	if (buf[4] != UBX_LEN_NAV_POSLLH) {
+		return false;
+	}
+
+	nav_posllh->tow_ms = buf_to_u32_little_endian(buf+6);
+	nav_posllh->longitude_100ndeg =  buf_to_u32_little_endian(buf+10);
+	nav_posllh->latitude_100ndeg =  buf_to_u32_little_endian(buf+14);
+	nav_posllh->height_ellipsoid_mm =  buf_to_u32_little_endian(buf+18);
+	nav_posllh->height_msl_mm = buf_to_u32_little_endian(buf+22);
+	nav_posllh->horizontal_accuracy_mm =  buf_to_u32_little_endian(buf+26);
+	nav_posllh->vertical_accuracy_mm =  buf_to_u32_little_endian(buf+30);
 
 //	navposllh->longitude_deg = navposllh->raw_longitude / 10000000.0;
 //	navposllh->latitude_deg = navposllh->raw_latitude / 10000000.0;
 
+	return true;
+}
+
+bool parse_ubx_nav_pvt(const struct ubx_gps *gps, struct ubx_nav_pvt *pvt)
+{
+	VMD_ASSERT_PARAM(gps);
+	VMD_ASSERT_PARAM(pvt);
+
+	const uint8_t *buf = gps->packet_buf;
+
+	if (buf[2] != UBX_CLASS_NAV || buf[3] != UBX_ID_PVT) {
+		return false;
+	}
+	if (buf[4] != UBX_LEN_NAV_PVT) {
+		return false;
+	}
+
+	pvt->tow_ms = buf_to_u32_little_endian(buf+6);
+	pvt->year = buf_to_u16_little_endian(buf+10);
+	pvt->month = buf[12];
+	pvt->day = buf[13];
+	pvt->hour = buf[14];
+	pvt->minuate = buf[15];
+	pvt->second = buf[16];
+	pvt->valid = buf[17];
+	pvt->time_accuracy_ns = buf_to_u32_little_endian(buf+18);
+	// TODO : 마무리
 	return true;
 }
 

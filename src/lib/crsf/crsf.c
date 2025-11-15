@@ -19,20 +19,20 @@
 
 #define CRSF_SYNC_CHAR 0xc8
 
-static void reverse_endian_u16(uint8_t *buf, uint16_t value)
+static void u16_to_buf_big_endian(uint8_t *buf, uint16_t value)
 {
 	buf[0] = value >> 8;
 	buf[1] = value & 0xff;
 }
 
-static void reverse_endian_u24(uint8_t *buf, uint32_t/*int로 바꿔야 할 수도*/ value)
+static void u24_to_buf_big_endian(uint8_t *buf, uint32_t value)
 {
 	buf[0] = value >> 16;
 	buf[1] = (value >> 8) & 0xff;
 	buf[2] = value & 0xff;
 }
 
-static void reverse_endian_i32(uint8_t *buf, int32_t value)
+static void u32_to_buf_big_endian(uint8_t *buf, int32_t value)
 {
 	buf[0] = value >> 24;
 	buf[1] = (value >> 16) & 0xff;
@@ -109,11 +109,11 @@ bool crsf_parse_gps(struct crsf_gps *gps, const struct crsf_frame *frame)
 		return false;
 	}
 
-	reverse_endian_i32((uint8_t*)&gps->latitude_100ndeg, ((int32_t*)frame->payload)[0]);
-	reverse_endian_i32((uint8_t*)&gps->longitude_100ndeg, ((int32_t*)frame->payload)[1]);
-	reverse_endian_u16((uint8_t*)&gps->groundspeed_damph, ((uint16_t*)frame->payload)[4]);
-	reverse_endian_u16((uint8_t*)&gps->heading_cdeg, ((uint16_t*)frame->payload)[5]);
-	reverse_endian_u16((uint8_t*)&gps->altitude_m, ((uint16_t*)frame->payload)[6]);
+	u32_to_buf_big_endian((uint8_t*)&gps->latitude_100ndeg, ((int32_t*)frame->payload)[0]);
+	u32_to_buf_big_endian((uint8_t*)&gps->longitude_100ndeg, ((int32_t*)frame->payload)[1]);
+	u16_to_buf_big_endian((uint8_t*)&gps->groundspeed_damph, ((uint16_t*)frame->payload)[4]);
+	u16_to_buf_big_endian((uint8_t*)&gps->heading_cdeg, ((uint16_t*)frame->payload)[5]);
+	u16_to_buf_big_endian((uint8_t*)&gps->altitude_m, ((uint16_t*)frame->payload)[6]);
 	gps->satellites = frame->payload[CRSF_PLD_SIZE_GPS-1];
 
 	gps->altitude_m -= 1000;
@@ -191,11 +191,11 @@ uint8_t crsf_make_gps(uint8_t *buf, uint8_t size, int32_t latitude_100ndeg, int3
 	buf[1] = CRSF_PLD_SIZE_GPS + 2;
 	buf[2] = CRSF_TYPE_GPS;
 
-	reverse_endian_i32(buf+3, latitude_100ndeg);
-	reverse_endian_i32(buf+7, longitude_100ndeg);
-	reverse_endian_u16(buf+11, groundspeed_damph);
-	reverse_endian_u16(buf+13, heading_cdeg);
-	reverse_endian_u16(buf+15, altitude_m+1000);
+	u32_to_buf_big_endian(buf+3, latitude_100ndeg);
+	u32_to_buf_big_endian(buf+7, longitude_100ndeg);
+	u16_to_buf_big_endian(buf+11, groundspeed_damph);
+	u16_to_buf_big_endian(buf+13, heading_cdeg);
+	u16_to_buf_big_endian(buf+15, altitude_m+1000);
 	buf[17] = satellites;
 
 	buf[18] = crsf_calc_crc8(buf+2, CRSF_PLD_SIZE_GPS+1);
@@ -217,9 +217,9 @@ uint8_t crsf_make_attitude(uint8_t *buf, uint8_t size, int16_t pitch_angle_100ur
 
 	int16_t *ptr_i16 = (int16_t*)(buf+3);
 
-	reverse_endian_u16(buf+3, pitch_angle_100urad);
-	reverse_endian_u16(buf+5, roll_angle_100urad);
-	reverse_endian_u16(buf+7, yaw_angle_100urad);
+	u16_to_buf_big_endian(buf+3, pitch_angle_100urad);
+	u16_to_buf_big_endian(buf+5, roll_angle_100urad);
+	u16_to_buf_big_endian(buf+7, yaw_angle_100urad);
 
 //	ptr_i16[0] = pitch_angle_100urad;
 //	ptr_i16[1] = roll_angle_100urad;
