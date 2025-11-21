@@ -383,6 +383,10 @@ bool icm20602_calc_angle_compfilter(struct icm20602 *imu, int16_t x_accel_lsb, i
 	float x_accel_g, y_accel_g, z_accel_g;
 	icm20602_parse_accel(imu, x_accel_lsb, y_accel_lsb, z_accel_lsb, &x_accel_g, &y_accel_g, &z_accel_g);
 
+	imu->x_gyro_dps = x_gyro_dps;
+	imu->y_gyro_dps = y_gyro_dps;
+	imu->z_gyro_dps = z_gyro_dps;
+
 	float dt_s = (HAL_GetTick() - imu->prev_time_ms) / 1000.0;
 
 	float add_x_angle_by_gyro_deg = x_gyro_dps * dt_s;	//현재 루프에서 추가된 각도
@@ -400,14 +404,14 @@ bool icm20602_calc_angle_compfilter(struct icm20602 *imu, int16_t x_accel_lsb, i
 	float y_angle_by_accel_deg = atan2f(-x_accel_g, sqrtf(y_accel_g*y_accel_g + z_accel_g*z_accel_g)) * RADIAN;
 
 	float alpha;
-	if (fabsf(imu->total_accel_vevtor) - 1 > 3) {
+	if (fabsf(imu->total_accel_vevtor) - 1 > 0.3) {
 		alpha = imu->compfilter_alpha;
 	} else {
 		alpha = 0.96;
 	}
 
-	imu->x_angle_deg = alpha * x_angle_by_accel_deg + (1 - alpha) * (imu->x_angle_deg + add_x_angle_by_gyro_deg);
-	imu->y_angle_deg = alpha * y_angle_by_accel_deg + (1 - alpha) * (imu->y_angle_deg + add_y_angle_by_gyro_deg);
+	imu->x_angle_deg = (1 - alpha) * x_angle_by_accel_deg + alpha * (imu->x_angle_deg + add_x_angle_by_gyro_deg);
+	imu->y_angle_deg = (1 - alpha) * y_angle_by_accel_deg + alpha * (imu->y_angle_deg + add_y_angle_by_gyro_deg);
 
 	if (imu->x_angle_deg >= 180) {
 		imu->x_angle_deg -= 360;

@@ -20,12 +20,11 @@ bool imu_init()
 
 
 
-	ret = icm20602_init(&g_imu, &hspi2, ICM20602_0_CS_GPIO_Port, ICM20602_0_CS_Pin, ICM20602_0_READY_GPIO_Port, ICM20602_0_READY_Pin, 4000.0/65536.0, 32.0/65536.0, 0.004);
+	ret = icm20602_init(&g_imu, &hspi2, ICM20602_0_CS_GPIO_Port, ICM20602_0_CS_Pin, ICM20602_0_READY_GPIO_Port, ICM20602_0_READY_Pin, 4000.0/65536.0, 32.0/65536.0, 0.996);
 	HAL_Delay(50);
 	if (!ret) {
 		return false;
 	}
-
 
 	// PWR_MGMT_2 0x6C
 //	ret = icm20602_write_spi_byte(&g_imu, ICM20602_REG_PWR_MGMT_2, 0x38); // Disable Acc(bit5:3-111), Enable Gyro(bit2:0-000)

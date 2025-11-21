@@ -12,15 +12,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-struct Servo {
+struct servo {
 	TIM_HandleTypeDef *htim;
 	uint32_t channel;
+
+	uint32_t min_input;
+	uint32_t max_input;
 
 	uint32_t min_ccr;
 	uint32_t max_ccr;
 };
 
-bool servo_init(struct Servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, uint32_t min_ccr, uint32_t max_ccr);
-bool servo_write(struct Servo *servo, uint32_t between0_to_1800);
+bool servo_init(struct servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, uint32_t min_input, uint32_t max_input, uint32_t min_ccr, uint32_t max_ccr);
+bool servo_write(struct servo *servo, uint32_t input);
 
 #endif /* __SERVO_DRIVER_H__ */

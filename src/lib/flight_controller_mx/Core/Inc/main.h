@@ -71,6 +71,8 @@ void Error_Handler(void);
 #define SERVO_FLAP_R_GPIO_Port GPIOB
 #define SERVO_AIL_L_Pin GPIO_PIN_1
 #define SERVO_AIL_L_GPIO_Port GPIOB
+#define DHT11_Pin GPIO_PIN_2
+#define DHT11_GPIO_Port GPIOB
 #define ICM20602_0_READY_Pin GPIO_PIN_12
 #define ICM20602_0_READY_GPIO_Port GPIOB
 #define ICM20602_0_CS_Pin GPIO_PIN_13

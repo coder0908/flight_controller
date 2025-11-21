@@ -8,10 +8,12 @@
 #ifndef __APP_H__
 #define __APP_H__
 
+#include <batt/batt.h>
 #include "init/consur/consur.h"
 #include "init/gps/gps.h"
 #include "init/imu/imu.h"
 #include "init/trcivr/trcivr.h"
+#include "init/attitude/attitude.h"
 #include "pp.h"
 
 

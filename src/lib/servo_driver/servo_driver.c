@@ -9,18 +9,21 @@
 #include "servo_driver.h"
 #include "vmd.h"
 
-static uint32_t map(uint16_t x, uint32_t min_in, uint32_t max_in, uint32_t min_out, uint32_t max_out)
+uint32_t map(uint32_t x, uint32_t min_in, uint32_t max_in, uint32_t min_out, uint32_t max_out)
 {
   return (x - min_in) * (max_out - min_out) / (max_in - min_in) + min_out;
 }
 
-bool servo_init(struct Servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, uint32_t min_ccr, uint32_t max_ccr)
+bool servo_init(struct servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, uint32_t min_input, uint32_t max_input, uint32_t min_ccr, uint32_t max_ccr)
 {
 	VMD_ASSERT_PARAM(servo);
 	VMD_ASSERT_PARAM(htim);
 
 	servo->htim = htim;
 	servo->channel = channel;
+
+	servo->min_input = min_input;
+	servo->max_input = max_input;
 
 	servo->min_ccr = min_ccr;
 	servo->max_ccr = max_ccr;
@@ -33,7 +36,7 @@ bool servo_init(struct Servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, 
 	return true;
 }
 
-//bool servo_change_CCR(struct Servo *servo, uint32_t CCR_0Degree, uint32_t CCR_180Degree)
+//bool servo_change_CCR(struct servo *servo, uint32_t CCR_0Degree, uint32_t CCR_180Degree)
 //{
 //	VMD_ASSERT_PARAM(servo);
 //	servo->CCR_0Degree = CCR_0Degree;
@@ -42,13 +45,11 @@ bool servo_init(struct Servo *servo, TIM_HandleTypeDef *htim, uint32_t channel, 
 //	return true;
 //}
 
-bool servo_write(struct Servo *servo, uint32_t between0_to_1800)
+bool servo_write(struct servo *servo, uint32_t input)
 {
 	VMD_ASSERT_PARAM(servo);
-	VMD_ASSERT_PARAM(between0_to_1800 <= 1800);
-	VMD_ASSERT_PARAM(between0_to_1800 >= 0);
 
-	uint32_t ccr = map(between0_to_1800, 0, 1800, servo->min_ccr, servo->max_ccr);
+	uint32_t ccr = map(input, servo->min_input, servo->max_input, servo->min_ccr, servo->max_ccr);
 
 	__HAL_TIM_SET_COMPARE(servo->htim, servo->channel, ccr);
 

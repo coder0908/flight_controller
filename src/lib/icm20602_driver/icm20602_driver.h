@@ -108,6 +108,10 @@ struct icm20602 {
 	 float y_angle_deg;
 	 float z_angle_deg;
 
+	 float x_gyro_dps;
+	 float y_gyro_dps;
+	 float z_gyro_dps;
+
 	 float total_accel_vevtor;
 };
 
@@ -132,6 +136,7 @@ bool icm20602_calibrate_gyro(struct icm20602 *imu);
 bool icm20602_calibrate_accel(struct icm20602 *imu);
 
 bool icm20602_parse_gyro(const struct icm20602 *imu, int16_t x_gyro_lsb, int16_t y_gyro_lsb, int16_t z_gyro_lsb, float *x_gyro_dps, float *y_gyro_dps, float *z_gyro_dps);
+bool icm20602_parse_accel(const struct icm20602 *imu, int16_t x_accel_lsb, int16_t y_accel_lsb, int16_t z_accel_lsb, float *x_accel_g, float *y_accel_g, float *z_accel_g);
 
 bool icm20602_calc_angle(struct icm20602 *imu, int16_t x_gyro_lsb, int16_t y_gyro_lsb, int16_t z_gyro_lsb);
 bool icm20602_calc_angle_compfilter(struct icm20602 *imu, int16_t x_accel_lsb, int16_t y_accel_lsb, int16_t z_accel_lsb, int16_t x_gyro_lsb, int16_t y_gyro_lsb, int16_t z_gyro_lsb);

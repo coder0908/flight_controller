@@ -10,8 +10,9 @@
 
 #include <stdint.h>
 #include "servo_driver.h"
+#include "crsf/crsf.h"
 
-extern struct Servo  bldc_left_mot, bldc_right_mot, servo_left_ail, servo_right_ail, servo_ele, servo_rud, servo_lan, servo_left_flap, servo_right_flap;
+extern struct servo  bldc_left_mot, bldc_right_mot, servo_left_ail, servo_right_ail, servo_ele, servo_rud, servo_lan, servo_left_flap, servo_right_flap;
 
 bool consur_init();
 
