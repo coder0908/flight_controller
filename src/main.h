@@ -5,9 +5,7 @@
  *      Author: unRR
  */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#pragma once
 
 #include "pp.h"
 
-#endif /* __MAIN_H__ */

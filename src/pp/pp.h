@@ -1,4 +1,4 @@
-/*
+	/*
  * sys.h
  *
  *  Created on: Oct 8, 2025
@@ -9,13 +9,13 @@
 #define __PP_H__
 
 #include "stm32f4xx_hal.h"	//always top
+#include "adc.h"
+#include "dma.h"
 #include "gpio.h"
+#include "i2c.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
-#include "adc.h"
-#include "i2c.h"
-#include "dma.h"
 #include <stdbool.h>
 
 #define DEBUG_LED_Pin GPIO_PIN_13
