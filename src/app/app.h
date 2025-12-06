@@ -8,7 +8,7 @@
 #ifndef __APP_H__
 #define __APP_H__
 
-#include "pp.h"
+#include "platform/hal/platform_hal.h"
 #include "app/battery/battery.h"
 #include "app/consur/consur.h"
 #include "app/imu/imu.h"

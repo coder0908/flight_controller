@@ -8,5 +8,4 @@
 #pragma once
 
 #include <stdbool.h>
-#include "crsf.h"
 

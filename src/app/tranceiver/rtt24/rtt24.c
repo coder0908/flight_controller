@@ -5,5 +5,5 @@
  *      Author: coder0908
  */
 
-#include "pp.h"
-#include "app/tranceiver/rtt24/rtt24.h"
+#include "platform/hal/platform_hal.h"
+#include "rtt24.h"

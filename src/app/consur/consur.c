@@ -5,7 +5,8 @@
  *      Author: coder0908
  */
 
-#include <pp/pp.h>
+#include "platform/hal/platform_hal.h"
+#include "drivers/servo_driver/servo_driver.h"
 #include "consur.h"
 
 struct servo  bldc_left_mot, bldc_right_mot, servo_left_ail, servo_right_ail, servo_ele, servo_rud, servo_lan, servo_left_flap, servo_right_flap;

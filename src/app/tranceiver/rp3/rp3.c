@@ -5,8 +5,9 @@
  *      Author: coder0908
  */
 
-#include "pp.h"
-#include "app/tranceiver/rp3/rp3.h"
+#include "platform/hal/platform_hal.h"
+#include "protocols/crsf/crsf.h"
+#include "rp3.h"
 
 #define RP3_LEN_RXBUF (CRSF_PLDLEN_MAX + CRSF_LEN_SYNC + CRSF_LEN_LEN)
 #define RP3_LEN_TXBUF (CRSF_PLDLEN_MAX + CRSF_LEN_SYNC + CRSF_LEN_LEN)

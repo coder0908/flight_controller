@@ -2,16 +2,16 @@
  * imu.c
  *
  *  Created on: Jun 22, 2025
- *      Author: mia00
+ *      Author: coder0908
  */
 
 
-#include <pp/pp.h>
+#include "platform/hal/platform_hal.h"
+#include "drivers/icm20602_driver/icm20602_driver.h"
 #include "imu.h"
 
-#define FIXED_ACCL_CALIBRATION false
 
-struct icm20602 g_imu;
+static struct icm20602 g_imu;
 
 
 bool imu_init()

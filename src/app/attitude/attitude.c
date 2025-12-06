@@ -2,12 +2,14 @@
  * attitude.c
  *
  *  Created on: Nov 19, 2025
- *      Author: unRR
+ *      Author: coder0908
  */
 
 
-#include <pp/pp.h>
-#include "app/attitude/attitude.h"
+
+#include "platform/hal/platform_hal.h"
+#include "core/pid/pid.h"
+#include "attitude.h"
 
 struct cascade_pid g_roll_cpid;
 struct cascade_pid g_pitch_cpid;

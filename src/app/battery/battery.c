@@ -6,8 +6,8 @@
  */
 
 
-#include "pp.h"
-#include "app/battery/battery.h"
+#include "platform/hal/platform_hal.h"
+#include "battery.h"
 
 #define ADC1_FULLSCALE				(4095.0f)
 #define BATTERY_VOLTAGESCALE_ADC1CH4		((47.0f+10.0f)/10.0f)

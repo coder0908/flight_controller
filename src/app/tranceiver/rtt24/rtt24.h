@@ -7,5 +7,4 @@
 
 #pragma once
 
-#include "crsf.h"
 
