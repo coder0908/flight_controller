@@ -27,6 +27,6 @@ void trcivr_loop()
 
 void trcivr_uart_rx_cplt_callback(UART_HandleTypeDef *huart)
 {
-	rp3_uart_receive_rx_cplt_callback(huart);
+	rp3_uart_rx_cplt_callback(huart);
 
 }

@@ -225,7 +225,6 @@ bool msgbox_unsubscribe(uint32_t msgbox_id, msgbox_callback_fp callback)
 	}
 
 	return false;
-
 }
 
 

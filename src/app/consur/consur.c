@@ -23,15 +23,15 @@ bool consur_init()
 {
 	bool tmp = false;
 
-	servo_init(&s_bldc_left_mot, &htim1, TIM_CHANNEL_1, 174, 1811, 500, 1000);
-	servo_init(&s_bldc_right_mot, &htim1, TIM_CHANNEL_2, 174, 1811, 500, 1000);
-	servo_init(&s_servo_left_ail, &htim3, TIM_CHANNEL_4, 174, 1811, 500, 1000);
-	servo_init(&s_servo_right_ail, &htim4, TIM_CHANNEL_2, 174, 1811, 500, 1000);
-	servo_init(&s_servo_ele, &htim3, TIM_CHANNEL_2, 174, 1811, 250, 1250);
-	servo_init(&s_servo_rud, &htim4, TIM_CHANNEL_1, 174, 1811, 250, 1250);
-	servo_init(&s_servo_lan, &htim3, TIM_CHANNEL_1, 174, 1811, 250, 1250);
-	servo_init(&s_servo_left_flap, &htim2, TIM_CHANNEL_2, 174, 1811, 250, 1250);
-	servo_init(&s_servo_right_flap, &htim3, TIM_CHANNEL_3, 174, 1811, 250, 1250);
+	servo_init(&s_bldc_left_mot, &htim1, TIM_CHANNEL_1, 172, 1811, 501, 1000);
+	servo_init(&s_bldc_right_mot, &htim1, TIM_CHANNEL_2, 172, 1811, 501, 1000);
+	servo_init(&s_servo_left_ail, &htim3, TIM_CHANNEL_4, 172, 1811, 500, 1000);
+	servo_init(&s_servo_right_ail, &htim4, TIM_CHANNEL_2, 172, 1811, 500, 1000);
+	servo_init(&s_servo_ele, &htim3, TIM_CHANNEL_2, 172, 1811, 250, 1250);
+	servo_init(&s_servo_rud, &htim4, TIM_CHANNEL_1, 172, 1811, 250, 1250);
+	servo_init(&s_servo_lan, &htim3, TIM_CHANNEL_1, 172, 1811, 250, 1250);
+	servo_init(&s_servo_left_flap, &htim2, TIM_CHANNEL_2, 172, 1811, 250, 1250);
+	servo_init(&s_servo_right_flap, &htim3, TIM_CHANNEL_3, 172, 1811, 250, 1250);
 
 	tmp = servo_write(&s_servo_left_ail, 922);
 	if (!tmp) {
@@ -119,12 +119,17 @@ void consur_loop()
 		}
 
 
-		if (rc_channels.chan8 == 191) {
-			servo_write(&s_bldc_left_mot, rc_channels.chan1);
+//		if (rc_channels.chan8 == 191) {
+//			servo_write(&s_bldc_left_mot, rc_channels.chan1);
+//			servo_write(&s_bldc_right_mot, rc_channels.chan1);
+//
+//		} else {
+//			servo_write(&s_bldc_left_mot, 174);
+//			servo_write(&s_bldc_right_mot, 174);
+//		}
 
-		} else {
-			servo_write(&s_bldc_left_mot, 174);
-		}
+		servo_write(&s_bldc_left_mot, rc_channels.chan1);
+		servo_write(&s_bldc_right_mot, rc_channels.chan1);
 
 		servo_write(&s_servo_rud, rc_channels.chan4);
 		servo_write(&s_servo_lan, rc_channels.chan4);

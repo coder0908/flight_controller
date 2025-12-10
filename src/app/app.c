@@ -18,6 +18,7 @@
 #include "app/tranceiver/tranceiver.h"
 #include "app/imu/icm20602/icm20602.h"
 #include "app/attitude/attitude.h"
+#include "app/gps/gps.h"
 
 #include "app.h"
 
@@ -43,11 +44,11 @@ bool setup()
 	if (!ret) {
 		return false;
 	}
-//
-//	ret = attitude_init();
-//	if (!ret) {
-//		return false;
-//	}
+
+	ret = gps_init();
+	if (!ret) {
+		return false;
+	}
 
 	ret = trcivr_init();
 	if (!ret) {
@@ -59,10 +60,6 @@ bool setup()
 		return false;
 	}
 
-//	ret = imu_init();
-//	if (!ret) {
-//		return false;
-//	}
 
 	return ret;
 }
@@ -88,6 +85,8 @@ void loop(void)
 	trcivr_loop();
 	consur_loop();
 	battery_loop();
+	gps_loop();
+
 
 
 }
@@ -95,6 +94,7 @@ void loop(void)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	trcivr_uart_rx_cplt_callback(huart);
+	gps_uart_rx_cplt_callback(huart);
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)

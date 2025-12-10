@@ -117,7 +117,7 @@ void rp3_flush_rx()
 
 }
 
-void rp3_uart_receive_rx_cplt_callback(UART_HandleTypeDef *huart)
+void rp3_uart_rx_cplt_callback(UART_HandleTypeDef *huart)
 {
 	if (huart->Instance != s_rp3_huart->Instance) {
 		return;

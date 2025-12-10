@@ -13,4 +13,4 @@
 bool rp3_init();
 void rp3_flush_rx();
 void rp3_flush_tx();
-void rp3_uart_receive_rx_cplt_callback(UART_HandleTypeDef *huart);
+void rp3_uart_rx_cplt_callback(UART_HandleTypeDef *huart);

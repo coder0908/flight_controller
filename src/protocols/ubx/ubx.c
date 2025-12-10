@@ -1,34 +1,93 @@
 /*
- * neom8n_ubx.c
+ * ubx.c
  *
  *  Created on: Jul 12, 2025
  *      Author: coder0908
  */
 
 
-#include <assert.h>
 #include "ubx.h"
 
-static uint32_t buf_to_u32_little_endian(const uint8_t *buf)
+static uint32_t buf_to_u32_little_endian(const uint8_t* buf)
 {
-	return buf[0] | (buf[1]<<8) | (buf[2]<<16) | (buf[3]<<24);
+	return (uint32_t)buf[3] | ((uint32_t)buf[2] << 8) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[0] << 24);
 }
 
-//ignore highest 8bit
-static uint32_t buf_to_u24_little_endian(const uint8_t *buf)
+static uint32_t buf_to_u24_little_endian(const uint8_t* buf)
 {
-	return buf[0] | (buf[1]<<8) | (buf[2]<<16);
+	return (uint32_t)buf[2] | ((uint32_t)buf[1] << 8) | ((uint32_t)buf[0] << 16);
 }
 
-static uint16_t buf_to_u16_little_endian(const uint8_t *buf)
+static uint16_t buf_to_u16_little_endian(const uint8_t* buf)
 {
-	return buf[0] | (buf[1]<<8);
+	return buf[1] | (buf[0] << 8);
 }
 
 static void ubx_checksum(uint8_t *ck_a, uint8_t *ck_b, uint8_t val)
 {
 	*ck_a = *ck_a + val;
 	*ck_b = *ck_b + *ck_a;
+}
+
+static void ubx_set_sync_a(struct ubx_frame *frame, uint8_t sync_a)
+{
+	assert(frame);
+
+	frame->frame[UBX_IDX_SYNC_A] = sync_a;
+
+}
+
+static void ubx_set_sync_b(struct ubx_frame *frame, uint8_t sync_b)
+{
+	assert(frame);
+
+	frame->frame[UBX_IDX_SYNC_B] = sync_b;
+
+}
+
+static void ubx_set_class(struct ubx_frame *frame, enum ubx_class class)
+{
+	assert(frame);
+	frame->frame[UBX_IDX_CLASS] = (uint8_t)class;
+
+}
+
+static void ubx_set_id(struct ubx_frame *frame, enum ubx_id id)
+{
+	assert(frame);
+
+	frame->frame[UBX_IDX_ID] = (uint8_t)id;
+
+}
+
+static void ubx_set_len(struct ubx_frame *frame, uint16_t len)
+{
+	assert(frame);
+
+	uint16_t *ptr = (uint16_t*)&(frame->frame[UBX_IDX_LEN]);
+	*ptr = len;
+}
+
+static void ubx_set_payload(struct ubx_frame *frame, const uint8_t payload[], uint16_t payload_len)
+{
+	assert(frame);
+
+	for (uint16_t i=0; i<ubx_get_len(frame); i++) {
+		 frame->frame[UBX_IDX_PAYLOAD+i] = payload[i];
+	}
+}
+
+static void ubx_set_ck_a(struct ubx_frame *frame, uint8_t ck_a)
+{
+	assert(frame);
+	frame->frame[UBX_IDX_CK_A(ubx_get_len(frame))] = ck_a;
+}
+
+static void ubx_set_ck_b(struct ubx_frame *frame, uint8_t ck_b)
+{
+	assert(frame);
+	frame->frame[UBX_IDX_CK_B(ubx_get_len(frame))] = ck_b;
+
 }
 
 
@@ -38,15 +97,12 @@ void ubx_calc_checksum_buf(const uint8_t *buf, uint16_t buf_len, uint8_t *ck_a, 
 	assert(ck_a);
 	assert(ck_b);
 
-	uint8_t tmp_ck_a = 0;
-	uint8_t tmp_ck_b = 0;
+	*ck_a = 0;
+	*ck_b = 0;
 
 	for (uint16_t i=2; i < buf_len-2; i++) {
-		ubx_checksum(&tmp_ck_a, &tmp_ck_b, buf[i]);
+		ubx_checksum(ck_a, ck_b, buf[i]);
 	}
-
-	*ck_a = tmp_ck_a;
-	*ck_b = tmp_ck_b;
 }
 
 void ubx_calc_checksum_frame(const struct ubx_frame *frame, uint8_t *ck_a, uint8_t *ck_b)
@@ -55,62 +111,17 @@ void ubx_calc_checksum_frame(const struct ubx_frame *frame, uint8_t *ck_a, uint8
 	assert(ck_a);
 	assert(ck_b);
 
-	const uint8_t *tmp_len = (uint8_t*)(&frame->len);
+	const uint16_t impact_len = UBX_LEN_CLASS+UBX_LEN_ID+UBX_LEN_LEN+ubx_get_len(frame);
+	const uint8_t *buf = &(frame->frame[UBX_IDX_CLASS]);
 
-	ubx_checksum(ck_a, ck_b, (uint8_t)frame->class);
-	ubx_checksum(ck_a, ck_b, (uint8_t)frame->id);
-	ubx_checksum(ck_a, ck_b, tmp_len[0]);
-	ubx_checksum(ck_a, ck_b, tmp_len[1]);
+	*ck_a = 0;
+	*ck_b = 0;
 
-	const uint8_t *const payload = frame->payload;
-
-	for (uint16_t i=0; i<frame->len; i++) {
-		ubx_checksum(ck_a, ck_b, payload[i]);
+	for (uint16_t i=0; i<impact_len; i++) {
+		ubx_checksum(ck_a, ck_b, buf[i]);
 	}
 }
 
-bool ubx_init_frame_queue(struct ubx_frame_queue *queue)
-{
-	assert(queue);
-
-	queue->head = 0;
-	queue->len = 0;
-
-	return true;
-}
-
-bool ubx_push_frame_queue(struct ubx_frame_queue *queue, const struct ubx_frame *frame)
-{
-	assert(queue);
-	assert(queue->len <= UBX_FRAMESLEN_MAX);
-
-	if (queue->len == UBX_FRAMESLEN_MAX) {
-		return false;
-	}
-
-	struct ubx_frame *const dest = queue->frames + (queue->head + queue->len) % UBX_FRAMESLEN_MAX;
-	*dest = *frame;
-	queue->len += 1;
-
-	return true;
-}
-
-bool ubx_pop_frame_queue(struct ubx_frame_queue *queue, struct ubx_frame *frame)
-{
-	assert(queue);
-	assert(frame);
-
-	if (queue->len == 0) {
-		return false;
-	}
-
-	struct ubx_frame *src = queue->frames + queue->head;
-	*frame = *src;
-	queue->len -= 1;
-	queue->head = (queue->head + 1) % UBX_FRAMESLEN_MAX;
-
-	return true;
-}
 
 bool ubx_parse_frame(struct ubx_frame *frame, const uint8_t *buf, uint16_t buf_len, uint16_t *read_len)
 {
@@ -122,70 +133,40 @@ bool ubx_parse_frame(struct ubx_frame *frame, const uint8_t *buf, uint16_t buf_l
 		return false;
 	}
 
-	if (buf[0] != UBX_SYNC_CHAR_1) {
+	if (buf[0] != UBX_SYNC_A) {
 		*read_len = 1;
 		return false;
 	}
 
-	if (buf[1] != UBX_SYNC_CHAR_2) {
+	if (buf[1] != UBX_SYNC_B) {
 		*read_len = 2;
 		return false;
 	}
 
-	frame->class = buf[2];
-	frame->id = buf[3];
+	ubx_set_sync_a(frame, buf[UBX_IDX_SYNC_A]);
+	ubx_set_sync_b(frame, buf[UBX_IDX_SYNC_B]);
+	ubx_set_class(frame, buf[UBX_IDX_CLASS]);
+	ubx_set_id(frame, buf[UBX_IDX_ID]);
 
-	uint16_t *len = (uint16_t*)(buf+4);
+	uint16_t *len = (uint16_t*)(&buf[UBX_IDX_LEN]);
 
 	if (buf_len < *len+UBX_LEN_METADATA || *len > UBX_PLDLEN_MAX) {
 		*read_len = buf_len;
 		return false;
 	}
-	frame->len = *len;
 
-	*read_len = *len + UBX_LEN_METADATA;
+	ubx_set_len(frame, *len);
 
-	ubx_calc_checksum_buf(buf, *len+UBX_LEN_METADATA, &(frame->ck_a), &(frame->ck_b));
-	if (frame->ck_a != buf[*len+6] || frame->ck_b != buf[*len+7]) {
+	uint8_t ck_a = 0, ck_b = 0;
+	ubx_calc_checksum_buf(buf, ubx_get_frame_length(frame), &ck_a, &ck_b);
+	if (ck_a != buf[UBX_IDX_CK_A(*len)] || ck_b != buf[UBX_IDX_CK_B(*len)]) {
 		return false;
 	}
 
-	for (uint16_t i=0; i<*len; i++) {
-		frame->payload[i] = buf[i+6];
-	}
+	ubx_set_ck_a(frame, ck_a);
+	ubx_set_ck_b(frame, ck_b);
 
-	return true;
-}
-
-void ubx_parse_frames(struct ubx_frame_queue *queue, uint8_t *buf, uint16_t buf_len, uint16_t *read_len)
-{
-	assert(queue);
-	assert(buf);
-	assert(read_len);
-
-	struct ubx_frame frame;
-	uint16_t tmp_read_len;
-	uint16_t total_read_len;
-	bool is_parse_success;
-
-	for (total_read_len=0; total_read_len<buf_len; /*intentionally do nothing*/) {
-		is_parse_success = ubx_parse_frame(&frame, buf + total_read_len, buf_len - total_read_len, &tmp_read_len);
-
-		total_read_len += tmp_read_len;
-		if (is_parse_success) {
-			if (!ubx_push_frame_queue(queue, &frame)) {
-				break;
-			}
-		}
-	}
-	*read_len = total_read_len;
-}
-
-bool ubx_flush_frame_queue(struct ubx_frame_queue *queue)
-{
-	assert(queue);
-
-	queue->len = 0;
+	ubx_set_payload(frame, &buf[UBX_IDX_PAYLOAD], *len);
 
 	return true;
 }
@@ -197,15 +178,15 @@ bool ubx_parse_nav_posllh(const struct ubx_frame *frame, struct ubx_nav_posllh *
 	assert(nav_posllh);
 
 
-	if (frame->class != UBX_CLASS_NAV || frame->id != UBX_ID_POSLLH) {
+	if (ubx_get_class(frame) != UBX_CLASS_NAV || ubx_get_id(frame) != UBX_ID_POSLLH) {
 		return false;
 	}
 
-	if (frame->len != UBX_PLDLEN_NAV_POSLLH) {
+	if (ubx_get_len(frame) != UBX_PLDLEN_NAV_POSLLH) {
 		return false;
 	}
 
-	const uint8_t *payload = frame->payload;
+	const uint8_t *payload = &(frame->frame[UBX_IDX_PAYLOAD]);
 
 	nav_posllh->tow_ms = buf_to_u32_little_endian(payload);
 	nav_posllh->longitude_100ndeg =  buf_to_u32_little_endian(payload+4);
@@ -223,15 +204,15 @@ bool ubx_parse_nav_pvt(struct ubx_frame *frame, struct ubx_nav_pvt *nav_pvt)
 	assert(frame);
 	assert(nav_pvt);
 
-	if (frame->class != UBX_CLASS_NAV || frame->id != UBX_ID_PVT) {
+	if (ubx_get_class(frame) != UBX_CLASS_NAV || ubx_get_id(frame) != UBX_ID_PVT) {
 		return false;
 	}
 
-	if (frame->len != UBX_PLDLEN_NAV_PVT) {
+	if (ubx_get_len(frame) != UBX_PLDLEN_NAV_PVT) {
 		return false;
 	}
 
-	const uint8_t *payload = frame->payload;
+	const uint8_t *payload = &(frame->frame[UBX_IDX_PAYLOAD]);
 
 	nav_pvt->tow_ms = buf_to_u32_little_endian(payload);
 	nav_pvt->year = buf_to_u16_little_endian(payload+4);
@@ -247,17 +228,17 @@ bool ubx_parse_nav_pvt(struct ubx_frame *frame, struct ubx_nav_pvt *nav_pvt)
 	nav_pvt->flags = payload[21];
 	nav_pvt->flags2 = payload[22];
 	nav_pvt->satellite = payload[23];
-	nav_pvt->longitude_100ndeg = buf_to_u32_little_endian(payload+24);
-	nav_pvt->latitude_100ndeg = buf_to_u32_little_endian(payload+28);
-	nav_pvt->alti_ellipsoid_mm = buf_to_u32_little_endian(payload+32);
+	nav_pvt->longitude_100ndeg = *((int32_t*)(payload+24));
+	nav_pvt->latitude_100ndeg = *((int32_t*)(payload+28));
+	nav_pvt->alti_ellipsoid_mm = *((int32_t*)(payload+32));
 	nav_pvt->alti_msl_mm = buf_to_u32_little_endian(payload+36);
 	nav_pvt->horizontal_accuracy_mm = buf_to_u32_little_endian(payload+40);
 	nav_pvt->vertical_accuracy_mm = buf_to_u32_little_endian(payload+44);
 	nav_pvt->northward_velocity_mmps = buf_to_u32_little_endian(payload+48);
 	nav_pvt->eastward_velocity_mmps = buf_to_u32_little_endian(payload+52);
 	nav_pvt->down_velocity_mmps = buf_to_u32_little_endian(payload+56);
-	nav_pvt->groundspeed_mmps = buf_to_u32_little_endian(payload+60);
-	nav_pvt->heading_of_motion_10udeg = buf_to_u32_little_endian(payload+64);
+	nav_pvt->groundspeed_mmps = *((int32_t*)(payload+60));
+	nav_pvt->heading_of_motion_10udeg = *((int32_t*)(payload+64));
 	nav_pvt->velocity_accuracy_mmps = buf_to_u32_little_endian(payload+68);
 	nav_pvt->heading_accuracy_10udeg = buf_to_u32_little_endian(payload+72);
 	nav_pvt->position_dop_centi = buf_to_u16_little_endian(payload+76);

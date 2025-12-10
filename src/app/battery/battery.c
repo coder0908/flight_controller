@@ -57,7 +57,7 @@ void battery_loop()
 	battery_read_voltage();
 	struct crsf_frame frame = {0,};
 
-	crsf_framing_battery(&frame, (int16_t)(s_battery_adc1_voltages_v[0]*10), (int16_t)(s_battery_adc1_voltages_v[1]*10), 0, 0);
+	crsf_framing_battery(&frame, (int16_t)(s_battery_adc1_voltages_v[0]*10.0f), (int16_t)(s_battery_adc1_voltages_v[1]*10.0f), 0, 0);
 	uint8_t len = crsf_get_frame_length(&frame);
 	assert(msgbox_publish(s_trcivr_tx_crsf_msgbox_id, frame.frame, len));
 }

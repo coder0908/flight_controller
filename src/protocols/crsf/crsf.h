@@ -41,7 +41,7 @@
 #define CRSF_IDX_SYNC			0
 #define CRSF_IDX_LEN			1
 #define CRSF_IDX_TYPE			2
-#define CRSF_IDX_PAYLOAD			3
+#define CRSF_IDX_PAYLOAD		3
 #define CRSF_IDX_CRC(len_field_value)	(len_field_value+1)
 
 enum crsf_type {
@@ -173,11 +173,11 @@ static inline uint8_t crsf_get_payload_length(const struct crsf_frame *frame)
 	return crsf_get_len(frame) - (CRSF_LEN_SYNC+CRSF_LEN_LEN);
 }
 
-static inline uint8_t crsf_get_type(const struct crsf_frame *frame)
+static inline enum crsf_type crsf_get_type(const struct crsf_frame *frame)
 {
 	assert(frame);
 
-	return frame->frame[CRSF_IDX_TYPE];
+	return (enum crsf_type)frame->frame[CRSF_IDX_TYPE];
 }
 
 static inline void crsf_get_payload(const struct crsf_frame *frame, uint8_t *payload)
@@ -188,7 +188,6 @@ static inline void crsf_get_payload(const struct crsf_frame *frame, uint8_t *pay
 		 payload[i] = frame->frame[CRSF_IDX_PAYLOAD+i];
 	}
 }
-
 
 static inline uint8_t crsf_get_crc(const struct crsf_frame *frame)
 {
@@ -210,7 +209,6 @@ uint8_t crsf_calc_crc8_frame(const struct crsf_frame *frame);
 
 
 bool crsf_parse_frame(struct crsf_frame *frame, const uint8_t *buf, uint8_t buf_len, uint8_t *read_len);
-
 
 bool crsf_parse_gps(const struct crsf_frame *frame, struct crsf_gps *gps);
 bool crsf_parse_rc_channels(const struct crsf_frame *frame, struct crsf_rc_channels *rc_channels);

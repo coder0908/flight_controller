@@ -67,14 +67,14 @@ static void crsf_set_len(struct crsf_frame *frame, uint8_t len)
 	frame->frame[CRSF_IDX_LEN] = len;
 }
 
-static void crsf_set_type(struct crsf_frame *frame, uint8_t type)
+static void crsf_set_type(struct crsf_frame *frame, enum crsf_type type)
 {
 	assert(frame);
 
-	frame->frame[CRSF_IDX_TYPE] = type;
+	frame->frame[CRSF_IDX_TYPE] = (uint8_t)type;
 }
 
-static void crsf_set_payload(struct crsf_frame *frame, const uint8_t *payload)
+static void crsf_set_payload(struct crsf_frame *frame, const uint8_t payload[])
 {
 	assert(frame);
 
@@ -149,7 +149,7 @@ bool crsf_parse_frame(struct crsf_frame *frame, const uint8_t *buf, uint8_t buf_
 	}
 
 	crsf_set_len(frame, buf[CRSF_IDX_LEN]);
-	crsf_set_type(frame, buf[CRSF_IDX_TYPE]);
+	crsf_set_type(frame, (enum crsf_type)buf[CRSF_IDX_TYPE]);
 	uint8_t len = crsf_get_len(frame);
 	uint8_t crc_idx = CRSF_IDX_CRC(len);
 

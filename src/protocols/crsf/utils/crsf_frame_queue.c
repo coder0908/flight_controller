@@ -46,7 +46,7 @@ bool crsf_pop_frame_queue(struct crsf_frame_queue *queue, struct crsf_frame *fra
 		return false;
 	}
 
-	struct crsf_frame *src = queue->frames + queue->head;
+	struct crsf_frame *src = &(queue->frames[queue->head]);
 	*frame = *src;
 	queue->len -= 1;
 	queue->head = (queue->head + 1) % CRSF_FRAMESLEN_MAX;
