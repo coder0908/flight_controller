@@ -6,13 +6,11 @@
  */
 
 
-
-#ifndef __ICM20602_DRIVER_H__
-#define __ICM20602_DRIVER_H__
+#pragma once
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "stm32f4xx_hal.h"
+#include "platform/hal/platform_hal.h"
 
 #define	ICM20602_REG_XG_OFFS_TC_H	0x04
 #define	ICM20602_REG_XG_OFFS_TC_L	0x05
@@ -124,5 +122,4 @@ void icm20602_parse_accel(const struct icm20602 *imu, int16_t x_accel_lsb, int16
 
 
 
-#endif /*__ICM20602_DRIVER_H__*/
 

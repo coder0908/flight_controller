@@ -1,0 +1,3 @@
+../src/app/hardware/tranceiver/tranceiver.c:15:6:trcivr_init	2
+../src/app/hardware/tranceiver/tranceiver.c:27:6:trcivr_loop	1
+../src/app/hardware/tranceiver/tranceiver.c:33:6:trcivr_uart_rx_cplt_callback	1

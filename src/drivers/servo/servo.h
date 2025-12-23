@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "stm32f4xx_hal.h"
+#include "platform/hal/platform_hal.h"
 
 struct servo {
 	TIM_HandleTypeDef *htim;

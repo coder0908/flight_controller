@@ -1,0 +1,3 @@
+../src/platform/hal/platform_hal.c:20:6:platform_hal_init	1
+../src/platform/hal/platform_hal.c:41:6:SystemClock_Config	3
+../src/platform/hal/platform_hal.c:82:6:Error_Handler	1

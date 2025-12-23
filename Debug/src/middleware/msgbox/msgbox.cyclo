@@ -1,0 +1,11 @@
+../src/middleware/msgbox/msgbox.c:33:17:msgbox_hash	1
+../src/middleware/msgbox/msgbox.c:38:17:msgbox_hash_name	2
+../src/middleware/msgbox/msgbox.c:51:13:msgbox_find_id	6
+../src/middleware/msgbox/msgbox.c:77:13:msgbox_find_new_id	4
+../src/middleware/msgbox/msgbox.c:99:13:msgbox_create	3
+../src/middleware/msgbox/msgbox.c:122:13:msgbox_destroy	2
+../src/middleware/msgbox/msgbox.c:141:6:msgbox_get	2
+../src/middleware/msgbox/msgbox.c:149:6:msgbox_release	1
+../src/middleware/msgbox/msgbox.c:154:6:msgbox_publish	5
+../src/middleware/msgbox/msgbox.c:179:6:msgbox_subscribe	3
+../src/middleware/msgbox/msgbox.c:200:6:msgbox_unsubscribe	5
